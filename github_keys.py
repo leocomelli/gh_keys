@@ -3,6 +3,7 @@
 
 import json
 import requests
+from ansible.module_utils.basic import *
 
 EXAMPLES = '''
   List public keys for a user
@@ -41,7 +42,7 @@ GH_API_URL = "https://api.github.com/%s"
 class GHKeys(object):
 
   def __init__(self, module):
-    self.action   = module.params['action']
+    self.action = module.params['action']
     self.user   = module.params['user']
     self.passwd = module.params['passwd']
     self.title  = module.params['title']
@@ -115,8 +116,5 @@ def main():
   except ValueError as err:
     module.fail_json(msg=err.args)
 
-  #print json.dumps({ "keys": x })
-
-from ansible.module_utils.basic import *
-
-main()
+if __name__ == '__main__':
+  main()
