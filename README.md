@@ -44,7 +44,7 @@ An Ansible module to manage github public keys. The Github lets you add many pub
 	  user: leocomelli
 	  passwd: secret
 	  title: my-new-pkey
-	  key: 'ssh-rsa AAA2...'
+	  key: /home/leocomelli/.ssh/id_rsa.pub
 
 	# output
 	# {"id":9999999991,"key":"ssh-rsa AAA2...","url":"https://api.github.com/user/keys/9999999991","title":"my-new-pkey","verified":true}

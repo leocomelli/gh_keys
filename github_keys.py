@@ -39,7 +39,7 @@ options:
     description: Title of the new ssh key
     required: for add_key action
   key:
-    description: The content of the new ssh key
+    description: The path of file that contains the public key
     required: for add_key action
   key_id:
     description: The key id provided by Github
@@ -60,7 +60,7 @@ EXAMPLES = '''
 - gh_keys: action=get_key user=leocomelli passwd=secret key_id=8767854
 
 # Adds a new public key (authentication required)
-- gh_keys: action=add_key user=leocomelli passwd=secret title=my_new_key key='ssh-rsa ...'
+- gh_keys: action=add_key user=leocomelli passwd=secret title=my_new_key key=/home/leocomelli/.ssh/id_rsa.pub
 
 # Removes an existing ssh key
 - gh_keys: action=remove_key user=leocomelli passwd=secret key_id=8767854
@@ -107,8 +107,11 @@ class GHKeys(object):
   def add_key(self):
     self.validate_fileds('add_key', ['title', 'key', 'passwd'])
 
+    with open(self.key, 'r') as content_file:
+      content = content_file.read()
+
     url = GH_API_URL %  "user/keys"
-    data = json.dumps({ 'title' : self.title, 'key' : self.key })
+    data = json.dumps({ 'title' : self.title, 'key' : content })
     response = requests.post(url, auth = (self.user, self.passwd), data = data) 
 
     return response.text
@@ -126,13 +129,17 @@ class GHKeys(object):
       if getattr(self, field) is None:
         raise ValueError(field + " cannot be null for action [" + action + "]")
 
+
+def convert_bool_to_str(value):
+  return value.replace('true', '"true"').replace('false', '"false"')
+
 def main():
   module = AnsibleModule(
     argument_spec = dict(
       passwd = dict(),
       title  = dict(),
       key    = dict(),
-      key_id = dict(),  
+      key_id = dict(),
       user   = dict(required=True),
       action = dict(required=True, choices=['list_keys', 'get_key', 'add_key', 'remove_key']),
     )
@@ -141,7 +148,8 @@ def main():
   gh_keys = GHKeys(module)
   try:
     result = gh_keys.work()
-    module.exit_json(result=result)
+    changed = False if eval(convert_bool_to_str(result)).has_key('message') else True
+    module.exit_json(changed=changed, result=result)
   except ValueError as err:
     module.fail_json(msg=err.args)
 

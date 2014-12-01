@@ -14,7 +14,6 @@ class GHKeysIntegTest(unittest.TestCase):
   '''
   The name of methods starts with test_0<n>, where <n> is a sequencial number to enforce the order of execution.
   '''
-  MY_KEY = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRbcAje66Tgehq9NQ9N4c/Au1lCfNJa3sk+4WhUgwq/6U8aY0+WxGSVidmmB0XARJeKZJ6pZ9wOBw5JNcAU3cA7FhI+D7RGlZUH1S47MGuNoOD8nsQdko1963QQflje7MdP0ncUv7T23vHU+bhUlg7sdJ4iR6wR94oe2E4v7MTss7tqqAcAAIOe5HG9o/WNCkf8XPMUeZitDMUiFSMs+8/yP2+faL2HESUqY5ufs5/XiitQSHnEsPkR2rKSlUEfXD2PoNDwjLbo7Xhm3v84OujlDV5FYCpTGpnHFEhYY97WGNdr+PBsv9Na+9Q74Jb/0mfA1Y99xUAQ473CKhbiy/V vagrant@ubuntu-14'
 
   added_key_id = None   
 
@@ -29,7 +28,7 @@ class GHKeysIntegTest(unittest.TestCase):
     	'user'   : os.getenv('gh_user'),
     	'passwd' : os.getenv('gh_passwd'),
     	'title'  : 'test-ghkeys',
-    	'key'    : self.MY_KEY
+    	'key'    : 'test_key.pub'
     	})
     gh_keys = GHKeys(module)    
     result = gh_keys.work()
@@ -46,10 +45,12 @@ class GHKeysIntegTest(unittest.TestCase):
     	'user'   : os.getenv('gh_user'),
     	'passwd' : os.getenv('gh_passwd'),
     	'title'  : 'test-ghkeys',
-    	'key'    : self.MY_KEY
+    	'key'    : 'test_key.pub'
     	})
     gh_keys = GHKeys(module)    
     result = gh_keys.work()
+
+    print result
 
     error_message = eval(self.convert_bool_to_str(result))['errors'][0]['message']
     self.assertEqual(error_message, 'key is already in use')
@@ -120,7 +121,7 @@ class GHKeysIntegTest(unittest.TestCase):
       'action' : 'remove_key',
       'user'   : os.getenv('gh_user'),
       'passwd' : os.getenv('gh_passwd'),
-      'key_id' : added_key_id
+      'key_id' : 123#added_key_id
       })
 
     gh_keys = GHKeys(module)    
