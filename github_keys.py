@@ -5,36 +5,65 @@ import json
 import requests
 from ansible.module_utils.basic import *
 
+DOCUMENTATION = '''
+---
+module: gh_keys
+version_added: n/a
+short_description: Manages github ssh keys.
+description:
+    - The module manages the ssh key for a specific user through Github API v3.
+options:
+  action:
+    description: This tells the gh_keys module what you want it to do.
+    required: true
+    choices: 
+      list_keys:
+        description: lists keys for authenticated or non-authenticated user. If the passwd field is informed, the module returns all keys and all data about its (In this case, the module will send the authentication data in request). Otherwise, the module returns only some data about the ssh keys of non-authenticated user.
+        required_fields: [user | user & passwd]
+      get_key:
+        description: gets a specific key by github ssh-key-id
+        required_fields: [user & passwd & key_id]
+      add_key:
+        description: adds a new public ssh key
+        required_fields: [user & passwd & title & key]
+      remove_key:
+        description: removes a specific key by github ssh-key-id
+        required_fields: [user & passwd & key_id]
+  user:
+    description: Github username.
+    required: true
+  passwd:
+    description: Github password. If 2FA is enabled for your account, you should generate a new personal access token. 
+    required: for actions: list_keys (your), get_key, add_key, remove_key
+  title:
+    description: Title of the new ssh key
+    required: for add_key action
+  key:
+    description: The content of the new ssh key
+    required: for add_key action
+  key_id:
+    description: The key id provided by Github
+    required: for get_key and remove_key actions
+author: Leonardo Comelli
+'''
+
 EXAMPLES = '''
-  List public keys for a user
-  gh-keys:
-    user: leocomelli
+# Example from Ansible Playbooks
 
-  List your public keys
-  gh-keys:
-    user: leocomelli
-    passwd: secret
+# Lists limit informations about all keys of non-authenticated user
+- gh_keys: action=list_keys user=leocomelli
 
-  Get a single public key
-  gh_keys:
-    user: leocomelli
-    passwd: secret
-    key_id: 123456
+# Lists all informations about all keys of authenticated user
+- gh_keys: action=list_keys user=leocomelli passwd=secret
 
-  Add a public key
-  gh_keys:
-    user: leocomelli
-    passwd: secret
-    title: new-key
-    key: 'ssh-rsa AAA...'
+# Gets a single public key (authetication required)
+- gh_keys: action=get_key user=leocomelli passwd=secret key_id=8767854
 
-  Remove a public key
-  gh_keys:
-    user: leocomelli
-    passwd: secret
-    key_id: 123456
-    state: absent
-    
+# Adds a new public key (authentication required)
+- gh_keys: action=add_key user=leocomelli passwd=secret title=my_new_key key='ssh-rsa ...'
+
+# Removes an existing ssh key
+- gh_keys: action=remove_key user=leocomelli passwd=secret key_id=8767854
 '''
 
 GH_API_URL = "https://api.github.com/%s"
@@ -65,15 +94,15 @@ class GHKeys(object):
       url = GH_API_URL % "user/keys"
       response = requests.get(url, auth=(self.user, self.passwd))  
 
-    return { "keys": response.text }
+    return response.text
 
   def get_key(self):
-    self.validate_fileds('add_key', ['key_id', 'passwd'])    
+    self.validate_fileds('get_key', ['key_id', 'passwd'])    
 
     url = GH_API_URL %  "user/keys/%s" % self.key_id
     response = requests.get(url, auth=(self.user, self.passwd)) 
 
-    return { "key": response.text }
+    return response.text
 
   def add_key(self):
     self.validate_fileds('add_key', ['title', 'key', 'passwd'])
@@ -82,7 +111,7 @@ class GHKeys(object):
     data = json.dumps({ 'title' : self.title, 'key' : self.key })
     response = requests.post(url, auth = (self.user, self.passwd), data = data) 
 
-    return { "key": response.text }
+    return response.text
 
   def remove_key(self):
     self.validate_fileds('remove_key', ['key_id', 'passwd'])
@@ -90,7 +119,7 @@ class GHKeys(object):
     url = GH_API_URL %  "user/keys/%s" % self.key_id
     response = requests.delete(url, auth=(self.user, self.passwd)) 
 
-    return { "key": response.text }
+    return response.text
 
   def validate_fileds(self, action, fields):
     for field in fields:
