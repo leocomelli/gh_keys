@@ -1,21 +1,57 @@
 # Ansible Module - Github Keys
 
-An Ansible module to manage github public keys. The Github lets you add many public ssh keys, this is way that Github uses  to identify trusted computers, without involving passwords.
+An Ansible module to manage github public keys. The Github lets you add many public ssh keys, this is way that Github uses to identify trusted computers, without involving passwords.
 
 ## Features:
+
 * Lists keys for non-authenticated user;
 * Lists keys for authenticated user;
 * Adds a new public ssh key;
 * Gets a public ssh key by GH id;
 * Removes an existing public ssh key.
 
+
+## Sample
+
+	# file: gh_keys.yml
+
+	- hosts: devel
+  	  user: root
+
+      tasks:
+        - name: Generate a new public key
+          user:
+            name: root
+            generate_ssh_key: yes
+            ssh_key_bits: 2048
+
+        - name: Add a new GH public key
+          gh_keys:
+            action: add_key
+            user: leocomelli
+            passwd: secret
+            title: devel
+            key: /root/.ssh/id_rsa.pub
+          register: keys
+
+        - debug:
+            var: keys.stdout
+
 ## Usage
 
 ### To execute
 
-	The extra module are found in the path specified by ANSIBLE_LIBRARY or the --module-path command line option.
+The extra module are found in the path specified by ANSIBLE_LIBRARY or the --module-path command line option.
 
-### Lists keys for non-authenticated user
+	export ANSIBLE_LIBRARY=~/ansible/modules/gh_keys
+	ansible-playbook gh_keys.yml -i hosts
+
+or
+
+	ansible-playbook gh_keys.yml -i hosts --module-path=~/ansible/modules/gh_keys/gh_keys.py
+
+
+### Lists keys of a non-authenticated user
 
 	...
 	- gh_keys:
@@ -25,7 +61,7 @@ An Ansible module to manage github public keys. The Github lets you add many pub
     # output
     # [{"id":999999999,"key":"ssh-rsa AAA..."}]
 
-### Lists keys for authenticated user
+### Lists keys of an authenticated user
 
 	...
 	- gh_keys:
