@@ -148,9 +148,11 @@ def main():
   gh_keys = GHKeys(module)
   try:
     result = gh_keys.work()
-    changed = False if eval(convert_bool_to_str(result)).has_key('message') else True
-    module.exit_json(changed=changed, result=result)
-  except ValueError as err:
+    if 'message' in result:
+      raise RuntimeError(result)
+
+    module.exit_json(changed=True, stdout=result)
+  except (RuntimeError, ValueError) as err:
     module.fail_json(msg=err.args)
 
 if __name__ == '__main__':
