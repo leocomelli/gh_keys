@@ -4,8 +4,8 @@ An Ansible module to manage github public keys. The Github lets you add many pub
 
 ## Features:
 
-* Lists keys for non-authenticated user;
-* Lists keys for authenticated user;
+* Lists keys of non-authenticated user;
+* Lists keys of authenticated user;
 * Adds a new public ssh key;
 * Gets a public ssh key by GH id;
 * Removes an existing public ssh key.
