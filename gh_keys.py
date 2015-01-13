@@ -130,7 +130,7 @@ class GHKeys(object):
     }
     return headers
 
-  def validate_fileds(self, action, fields):
+  def validate_fields(self, action, fields):
     for field in fields:
       if getattr(self, field) is None:
         raise ValueError(field + " cannot be null for action [" + action + "]")
