@@ -154,7 +154,7 @@ def main():
     #  raise RuntimeError(result)
 
     module.exit_json(changed=True, stdout=response)
-  except (RuntimeError, ValueError) as err:
+  except (RuntimeError, ValueError), err:
     print err.args
     #module.fail_json(msg=err.args)
 
