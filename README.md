@@ -29,7 +29,7 @@ An Ansible module to manage github public keys. The Github lets you add many pub
           gh_keys:
             action: add_key
             user: leocomelli
-            passwd: secret
+            password: secret
             title: devel
             key: /root/.ssh/id_rsa.pub
           register: keys
@@ -67,7 +67,7 @@ or
 	- gh_keys:
 	    action: list_keys
 	    user: leocomelli
-	    passwd: secret
+	    password: secret
 
 	# output
 	# [{"id":999999999,"key":"ssh-rsa AAA...","url":"https://api.github.com/user/keys/999999999","title":"test-ghkeys","verified":true}]
@@ -78,7 +78,7 @@ or
 	- gh_keys:
 	  action: add_key
 	  user: leocomelli
-	  passwd: secret
+	  password: secret
 	  title: my-new-pkey
 	  key: /home/leocomelli/.ssh/id_rsa.pub
 
@@ -91,7 +91,7 @@ or
 	- gh_keys:
 	  action: get_key
 	  user: leocomelli
-	  passwd: secret
+	  password: secret
 	  key_id: 9999999991
 
 	# output
@@ -103,7 +103,7 @@ or
 	- gh_keys:
 	  action: remove_key
 	  user: leocomelli
-	  passwd: secret
+	  password: secret
 	  key_id: 9999999991
 
 	# output
@@ -123,7 +123,7 @@ What I need to do to execute the manual test of gh_keys module?
 	source ansible/hacking/env-setup
 	chmod +x ansible/hacking/test-module
 
-	sudo -E /ansible/hacking/test-module -m github_keys.py -a "action=list_keys user=leocomelli"
+	sudo -E /ansible/hacking/test-module -m gh_keys.py -a "action=list_keys user=leocomelli"
 
 More infos [click here](http://docs.ansible.com/developing_modules.html)
 
@@ -131,19 +131,19 @@ More infos [click here](http://docs.ansible.com/developing_modules.html)
 
 What I need to do to run the unit tests of gh_keys module?
 
-	git clone git@github.com:leocomelli/ansible-ghkeys.git
-	PYTHONPATH=$PWD python test/github_keys_unittest.py
+	git clone git@github.com:leocomelli/gh_keys.git
+	PYTHONPATH=$PWD python test/gh_keys_unittest.py
 
 What I need to do to run the integration tests of gh_keys module?
 
 The integration tests require the GH user and passwod, because the tests will actually create a public ssh key in your GH account. These fields should be informed by environment variables (gh_user and gh_passwd).
 
-	git clone git@github.com:leocomelli/ansible-ghkeys.git
+	git clone git@github.com:leocomelli/gh_keys.git
 
 	export gh_user=leocomelli
-	export gh_passwd=secret
+	export gh_password=secret
 
-	PYTHONPATH=$PWD python test/github_keys_integtest.py
+	PYTHONPATH=$PWD python test/gh_keys_integtest.py
 
 ## License
 
