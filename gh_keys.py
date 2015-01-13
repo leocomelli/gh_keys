@@ -7,7 +7,7 @@ import base64
 DOCUMENTATION = '''
 ---
 module: gh_keys
-version_added: n/a
+version_added: 1.9 
 short_description: Manages github ssh keys.
 description:
     - The module manages the ssh key for a specific user through Github API v3.
