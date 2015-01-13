@@ -93,7 +93,7 @@ class GHKeys(object):
     return response.read(), info
  
   def get_key(self):
-    self.validate_fileds('get_key', ['key_id', 'password'])    
+    self.validate_fields('get_key', ['key_id', 'password'])    
 
     url = GH_API_URL %  "user/keys/%s" % self.key_id
     headers = self.get_auth_header(self.user, self.password)
@@ -102,20 +102,23 @@ class GHKeys(object):
     return response.read(), info
 
   def add_key(self):
-    self.validate_fileds('add_key', ['title', 'key', 'password'])
+    self.validate_fields('add_key', ['title', 'key', 'password'])
 
-    with open(self.key, 'r') as content_file:
-      content = content_file.read()
-
+    f = open(self.key, 'r')
+    try:
+      content = f.readline()
+    finally:
+      f.close()
+    
     url = GH_API_URL %  "user/keys"
     headers = self.get_auth_header(self.user, self.password)
     data = json.dumps({ 'title' : self.title, 'key' : content })
     response, info = fetch_url(self.module, url, headers=headers, data=data)
-
+    
     return response.read(), info
 
   def remove_key(self):
-    self.validate_fileds('remove_key', ['key_id', 'password'])
+    self.validate_fields('remove_key', ['key_id', 'password'])
 
     url = GH_API_URL %  "user/keys/%s" % self.key_id
     headers = self.get_auth_header(self.user, self.password)
