@@ -32,7 +32,7 @@ class GHKeysIntegTest(unittest.TestCase):
     gh_keys = GHKeys(module)    
     result = gh_keys.perform_by_action()
  
-    print result
+    #print result
 
     global added_key_id
     added_key_id = eval(result.replace('true', '"true"'))['id']
@@ -46,13 +46,9 @@ class GHKeysIntegTest(unittest.TestCase):
     	'title'    : 'test-ghkeys',
     	'key'      : 'test_key.pub'
     	})
-    gh_keys = GHKeys(module)    
-    result = gh_keys.perform_by_action()
-
-    print result
-
-    error_message = eval(self.convert_bool_to_str(result))['errors'][0]['message']
-    self.assertEqual(error_message, 'key is already in use')
+    gh_keys = GHKeys(module)
+    with self.assertRaises(RuntimeError):    
+      result = gh_keys.perform_by_action()
 
   def test_03_should_get_key(self):
     global added_key_id
@@ -66,7 +62,7 @@ class GHKeysIntegTest(unittest.TestCase):
     gh_keys = GHKeys(module)    
     result = gh_keys.perform_by_action()
 
-    print result
+    #print result
 
     self.assertIsNotNone(eval(self.convert_bool_to_str(result))['key'])    
 
@@ -79,7 +75,7 @@ class GHKeysIntegTest(unittest.TestCase):
     gh_keys = GHKeys(module)    
     result = gh_keys.perform_by_action()
 
-    print result
+    #print result
 
     global added_key_id
 
@@ -101,7 +97,7 @@ class GHKeysIntegTest(unittest.TestCase):
     gh_keys = GHKeys(module)    
     result = gh_keys.perform_by_action()
 
-    print result
+    #print result
 
     global added_key_id
 
@@ -120,11 +116,11 @@ class GHKeysIntegTest(unittest.TestCase):
       'action'   : 'remove_key',
       'user'     : os.getenv('gh_user'),
       'password' : os.getenv('gh_password'),
-      'key_id'   : 123#added_key_id
+      'key_id'   : added_key_id
       })
 
-    gh_keys = GHKeys(module)    
-    result = gh_keys.perform_by_action()
+    gh_keys = GHKeys(module)
+    result = gh_keys.perform_by_action()    
 
     print result
 
@@ -136,10 +132,8 @@ class GHKeysIntegTest(unittest.TestCase):
       'key_id'   : added_key_id
       })
     gh_keys = GHKeys(module)    
-    result = gh_keys.perform_by_action()
-
-    with self.assertRaises(KeyError):
-      eval(self.convert_bool_to_str(result))['key']      
+    with self.assertRaises(RuntimeError):
+      result = gh_keys.perform_by_action()
  
   def convert_bool_to_str(self, value):
     return value.replace('true', '"true"').replace('false', '"false"')
