@@ -156,7 +156,7 @@ def main():
     #if 'message' in result:
     #  raise RuntimeError(result)
 
-    module.exit_json(changed=True, stdout=response)
+    module.exit_json(changed=True, result=response)
   except (RuntimeError, ValueError), err:
     print err.args
     #module.fail_json(msg=err.args)
