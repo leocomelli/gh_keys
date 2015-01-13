@@ -90,7 +90,7 @@ class GHKeys(object):
       headers = self.get_auth_header(self.user, self.password)
       response, info = fetch_url(self.module, url, headers=headers)
     
-    return response.read(), info
+    return self.handle_response(response, info)
  
   def get_key(self):
     self.validate_fields('get_key', ['key_id', 'password'])    
@@ -99,7 +99,7 @@ class GHKeys(object):
     headers = self.get_auth_header(self.user, self.password)
     response, info = fetch_url(self.module, url, headers=headers)
 
-    return response.read(), info
+    return self.handle_response(response, info)
 
   def add_key(self):
     self.validate_fields('add_key', ['title', 'key', 'password'])
@@ -114,8 +114,8 @@ class GHKeys(object):
     headers = self.get_auth_header(self.user, self.password)
     data = json.dumps({ 'title' : self.title, 'key' : content })
     response, info = fetch_url(self.module, url, headers=headers, data=data)
-    
-    return response.read(), info
+      
+    return self.handle_response(response, info)
 
   def remove_key(self):
     self.validate_fields('remove_key', ['key_id', 'password'])
@@ -124,7 +124,7 @@ class GHKeys(object):
     headers = self.get_auth_header(self.user, self.password)
     response, info = fetch_url(self.module, url, headers=headers, method='DELETE')
 
-    return response.read(), info
+    return self.handle_response(response, info)
 
   def get_auth_header(self, user, password):
     auth = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
@@ -137,6 +137,12 @@ class GHKeys(object):
     for field in fields:
       if getattr(self, field) is None:
         raise ValueError(field + " cannot be null for action [" + action + "]")
+
+  def handle_response(self, response, info):
+    if info['status'] == 200:
+      return response.read()
+    else:
+      raise RuntimeError(info['msg']) 
 
 def main():
   module = AnsibleModule(
@@ -152,14 +158,10 @@ def main():
 
   gh_keys = GHKeys(module)
   try:
-    response, info = gh_keys.perform_by_action()
-    #if 'message' in result:
-    #  raise RuntimeError(result)
-
+    response = gh_keys.perform_by_action()
     module.exit_json(changed=True, result=response)
   except (RuntimeError, ValueError), err:
-    print err.args
-    #module.fail_json(msg=err.args)
+    module.fail_json(msg=err.args)
 
 from ansible.module_utils.basic import *
 from ansible.module_utils.urls import *
