@@ -73,7 +73,7 @@ class GHKeys(object):
     self.key    = module.params['key']
     self.key_id = module.params['key_id']
   
-  def work(self):
+  def perform_by_action(self):
     return {
       'list_keys'  : self.list_keys,
       'get_key'    : self.get_key,
@@ -152,7 +152,7 @@ def main():
 
   gh_keys = GHKeys(module)
   try:
-    response, info = gh_keys.work()
+    response, info = gh_keys.perform_by_action()
     #if 'message' in result:
     #  raise RuntimeError(result)
 
