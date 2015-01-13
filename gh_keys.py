@@ -135,10 +135,6 @@ class GHKeys(object):
       if getattr(self, field) is None:
         raise ValueError(field + " cannot be null for action [" + action + "]")
 
-
-def convert_bool_to_str(value):
-  return value.replace('true', '"true"').replace('false', '"false"')
-
 def main():
   module = AnsibleModule(
     argument_spec = dict(
