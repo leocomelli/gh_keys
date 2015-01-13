@@ -113,7 +113,7 @@ class GHKeys(object):
     url = GH_API_URL %  "user/keys"
     headers = self.get_auth_header(self.user, self.password)
     data = json.dumps({ 'title' : self.title, 'key' : content })
-    response, info = fetch_url(self.module, url, headers=headers, data=data)
+    response, info = fetch_url(self.module, url, headers=headers, data=data, method='POST')
       
     return self.handle_response(response, info)
 
