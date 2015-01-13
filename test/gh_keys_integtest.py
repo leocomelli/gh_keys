@@ -5,10 +5,9 @@ import unittest
 import imp
 import os
 
-imp.load_source('github_keys', os.path.join(os.path.dirname(__file__), os.path.pardir, 'github_keys.py'))
-from github_keys import GHKeys
+imp.load_source('gh_keys', os.path.join(os.path.dirname(__file__), os.path.pardir, 'gh_keys.py'))
+from gh_keys import GHKeys
 from ansible_fake import AnsibleFake
-
 
 class GHKeysIntegTest(unittest.TestCase):
   '''
@@ -18,37 +17,37 @@ class GHKeysIntegTest(unittest.TestCase):
   added_key_id = None   
 
   def setUp(self):
-    if os.getenv('gh_user') is None and os.getenv('gh_passwd') is None:
-      raise ValueError('The environment variable are required [ gh_user and gh_passwd] to run the integration tests')
+    if os.getenv('gh_user') is None and os.getenv('gh_password') is None:
+      raise ValueError('The environment variable are required [ gh_user and gh_password] to run the integration tests')
 
 
   def test_01_should_add_new_key(self):
     module = AnsibleFake({
-    	'action' : 'add_key',
-    	'user'   : os.getenv('gh_user'),
-    	'passwd' : os.getenv('gh_passwd'),
-    	'title'  : 'test-ghkeys',
-    	'key'    : 'test_key.pub'
+    	'action'   : 'add_key',
+    	'user'     : os.getenv('gh_user'),
+    	'password' : os.getenv('gh_password'),
+    	'title'    : 'test-ghkeys',
+    	'key'      : 'test_key.pub'
     	})
     gh_keys = GHKeys(module)    
-    result = gh_keys.work()
+    result = gh_keys.perform_by_action()
  
     print result
 
     global added_key_id
     added_key_id = eval(result.replace('true', '"true"'))['id']
-    self.assertIsNotNone(added_key_id)
+    self.assertIsNotNone(added_key_id) 
 
   def test_02_should_identify_that_key_already_exists(self):
     module = AnsibleFake({
-    	'action' : 'add_key',
-    	'user'   : os.getenv('gh_user'),
-    	'passwd' : os.getenv('gh_passwd'),
-    	'title'  : 'test-ghkeys',
-    	'key'    : 'test_key.pub'
+    	'action'   : 'add_key',
+    	'user'     : os.getenv('gh_user'),
+    	'password' : os.getenv('gh_password'),
+    	'title'    : 'test-ghkeys',
+    	'key'      : 'test_key.pub'
     	})
     gh_keys = GHKeys(module)    
-    result = gh_keys.work()
+    result = gh_keys.perform_by_action()
 
     print result
 
@@ -59,13 +58,13 @@ class GHKeysIntegTest(unittest.TestCase):
     global added_key_id
 
     module = AnsibleFake({
-      'action' : 'get_key',
-      'user'   : os.getenv('gh_user'),
-      'passwd' : os.getenv('gh_passwd'),
-      'key_id' : added_key_id
+      'action'   : 'get_key',
+      'user'     : os.getenv('gh_user'),
+      'password' : os.getenv('gh_password'),
+      'key_id'   : added_key_id
       })
     gh_keys = GHKeys(module)    
-    result = gh_keys.work()
+    result = gh_keys.perform_by_action()
 
     print result
 
@@ -78,7 +77,7 @@ class GHKeysIntegTest(unittest.TestCase):
       })
 
     gh_keys = GHKeys(module)    
-    result = gh_keys.work()
+    result = gh_keys.perform_by_action()
 
     print result
 
@@ -94,13 +93,13 @@ class GHKeysIntegTest(unittest.TestCase):
 
   def test_05_should_list_keys_authenticated_user(self):
     module = AnsibleFake({
-      'action' : 'list_keys',
-      'user'   : os.getenv('gh_user'),
-      'passwd' : os.getenv('gh_passwd'),
+      'action'   : 'list_keys',
+      'user'     : os.getenv('gh_user'),
+      'password' : os.getenv('gh_password'),
       })
 
     gh_keys = GHKeys(module)    
-    result = gh_keys.work()
+    result = gh_keys.perform_by_action()
 
     print result
 
@@ -118,26 +117,26 @@ class GHKeysIntegTest(unittest.TestCase):
     global added_key_id
 
     module = AnsibleFake({
-      'action' : 'remove_key',
-      'user'   : os.getenv('gh_user'),
-      'passwd' : os.getenv('gh_passwd'),
-      'key_id' : 123#added_key_id
+      'action'   : 'remove_key',
+      'user'     : os.getenv('gh_user'),
+      'password' : os.getenv('gh_password'),
+      'key_id'   : 123#added_key_id
       })
 
     gh_keys = GHKeys(module)    
-    result = gh_keys.work()
+    result = gh_keys.perform_by_action()
 
     print result
 
     # Verify!
     module = AnsibleFake({
-      'action' : 'get_key',
-      'user'   : os.getenv('gh_user'),
-      'passwd' : os.getenv('gh_passwd'),
-      'key_id' : added_key_id
+      'action'   : 'get_key',
+      'user'     : os.getenv('gh_user'),
+      'password' : os.getenv('gh_password'),
+      'key_id'   : added_key_id
       })
     gh_keys = GHKeys(module)    
-    result = gh_keys.work()
+    result = gh_keys.perform_by_action()
 
     with self.assertRaises(KeyError):
       eval(self.convert_bool_to_str(result))['key']      
@@ -145,5 +144,6 @@ class GHKeysIntegTest(unittest.TestCase):
   def convert_bool_to_str(self, value):
     return value.replace('true', '"true"').replace('false', '"false"')
 
+from ansible.module_utils.basic import *
 if __name__ == '__main__':
   unittest.main()
