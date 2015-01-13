@@ -11,38 +11,33 @@ version_added: n/a
 short_description: Manages github ssh keys.
 description:
     - The module manages the ssh key for a specific user through Github API v3.
+
 options:
   action:
     description: This tells the gh_keys module what you want it to do.
     required: true
-    choices: 
-      list_keys:
-        description: lists keys for authenticated or non-authenticated user. If the passwd field is informed, the module returns all keys and all data about its (In this case, the module will send the authentication data in request). Otherwise, the module returns only some data about the ssh keys of non-authenticated user.
-        required_fields: [user | user & passwd]
-      get_key:
-        description: gets a specific key by github ssh-key-id
-        required_fields: [user & passwd & key_id]
-      add_key:
-        description: adds a new public ssh key
-        required_fields: [user & passwd & title & key]
-      remove_key:
-        description: removes a specific key by github ssh-key-id
-        required_fields: [user & passwd & key_id]
+    choices: [ list_keys, get_key, add_key, remove_key ]
+
   user:
     description: Github username.
     required: true
+
   passwd:
-    description: Github password. If 2FA is enabled for your account, you should generate a new personal access token. 
-    required: for actions: list_keys (your), get_key, add_key, remove_key
+    description: Github password. If 2FA is enabled for your account, you should generate a new personal access token. Required for get_key, add_key and remove_key 
+    required: false 
+
   title:
-    description: Title of the new ssh key
-    required: for add_key action
+    description: Title of the new ssh key. Required for add_key
+    required: false
+
   key:
-    description: The path of file that contains the public key
-    required: for add_key action
+    description: The path of file that contains the public key. Required for add_key
+    required: false
+
   key_id:
-    description: The key id provided by Github
-    required: for get_key and remove_key actions
+    description: The key id provided by Github. Required for get_key and remove_key
+    required: false
+
 author: Leonardo Comelli
 '''
 
