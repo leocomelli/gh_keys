@@ -12,7 +12,7 @@
       gh_keys:
         action: add_key
         user: leocomelli
-        passwd: secret
+        password: secret
         title: devel
         key: /root/.ssh/id_rsa.pub
       register: keys
