@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-import requests
-from ansible.module_utils.basic import *
+import base64
 
 DOCUMENTATION = '''
 ---
@@ -71,6 +70,7 @@ GH_API_URL = "https://api.github.com/%s"
 class GHKeys(object):
 
   def __init__(self, module):
+    self.module = module
     self.action = module.params['action']
     self.user   = module.params['user']
     self.passwd = module.params['passwd']
@@ -89,20 +89,22 @@ class GHKeys(object):
   def list_keys(self):
     if self.passwd is None:
       url = GH_API_URL % "users/%s/keys" % self.user
-      response = requests.get(url)  
+      response, info = fetch_url(self.module, url)
     else:
       url = GH_API_URL % "user/keys"
-      response = requests.get(url, auth=(self.user, self.passwd))  
-
-    return response.text
-
+      headers = self.get_auth_header(self.user, self.passwd)
+      response, info = fetch_url(self.module, url, headers=headers)
+    
+    return response.read(), info
+ 
   def get_key(self):
     self.validate_fileds('get_key', ['key_id', 'passwd'])    
 
     url = GH_API_URL %  "user/keys/%s" % self.key_id
-    response = requests.get(url, auth=(self.user, self.passwd)) 
+    headers = self.get_auth_header(self.user, self.passwd)
+    response, info = fetch_url(self.module, url, headers=headers)
 
-    return response.text
+    return response.read(), info
 
   def add_key(self):
     self.validate_fileds('add_key', ['title', 'key', 'passwd'])
@@ -111,18 +113,27 @@ class GHKeys(object):
       content = content_file.read()
 
     url = GH_API_URL %  "user/keys"
+    headers = self.get_auth_header(self.user, self.passwd)
     data = json.dumps({ 'title' : self.title, 'key' : content })
-    response = requests.post(url, auth = (self.user, self.passwd), data = data) 
+    response, info = fetch_url(self.module, url, headers=headers, data=data)
 
-    return response.text
+    return response.read(), info
 
   def remove_key(self):
     self.validate_fileds('remove_key', ['key_id', 'passwd'])
 
     url = GH_API_URL %  "user/keys/%s" % self.key_id
-    response = requests.delete(url, auth=(self.user, self.passwd)) 
+    headers = self.get_auth_header(self.user, self.passwd)
+    response, info = fetch_url(self.module, url, headers=headers, method='DELETE')
 
-    return response.text
+    return response.read(), info
+
+  def get_auth_header(self, user, password):
+    auth = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
+    headers = {
+      'Authorization': 'Basic %s' % auth,
+    }
+    return headers
 
   def validate_fileds(self, action, fields):
     for field in fields:
@@ -147,13 +158,17 @@ def main():
 
   gh_keys = GHKeys(module)
   try:
-    result = gh_keys.work()
-    if 'message' in result:
-      raise RuntimeError(result)
+    response, info = gh_keys.work()
+    #if 'message' in result:
+    #  raise RuntimeError(result)
 
-    module.exit_json(changed=True, stdout=result)
+    module.exit_json(changed=True, stdout=response)
   except (RuntimeError, ValueError) as err:
-    module.fail_json(msg=err.args)
+    print err.args
+    #module.fail_json(msg=err.args)
+
+from ansible.module_utils.basic import *
+from ansible.module_utils.urls import *
 
 if __name__ == '__main__':
   main()
